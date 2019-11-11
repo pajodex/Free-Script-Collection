@@ -1,0 +1,63 @@
+//===== rAthena Script =======================================
+//= Armor and Costume Enchanter
+//===== By: ==================================================
+//= pajodex
+//===== Current Version: =====================================
+// 1.0
+//============================================================
+prontera,150,180,0	script	Enchanter	100,{
+	disable_items;
+	.@nm$ = "[^ff0000 "+strnpcinfo(1)+" ^000000]";
+	.@payment = 501; // Credit item id.
+	.@amount = 25; // Amount
+	mes .@nm$;
+	mes "I need "+.@amount+" x "+getitemname(.@payment)+" to avail my service.";
+	next;
+	setarray .@pos$, "Armor",	"Garment",	 "Shoes",	"Shield",	"Costume Upper",	  "Costume Mid",		"Costume Low",	  	  "Costume Garment";
+	setarray .@pos,	 EQI_ARMOR, EQI_GARMENT, EQI_SHOES, EQI_HAND_L, EQI_COSTUME_HEAD_TOP, EQI_COSTUME_HEAD_MID, EQI_COSTUME_HEAD_LOW, EQI_COSTUME_GARMENT;
+	.@menu$ ="";
+	for( .@i = 0; .@i < getarraysize(.@pos); .@i++ ) {
+		if ( getequipisequiped(.@pos[.@i]) ) .@menu$ += .@pos$[.@i] + "-" + "[^777777" + getequipname(.@pos[.@i]) + "^000000]";
+		.@menu$ += ":";
+	}
+	.@part = .@pos[select(.@menu$)-1];
+	.@itemid = getequipid(.@part);
+	.@refine = getequiprefinerycnt(.@part);
+	.@card1 = getequipcardid(.@part, 0);
+	.@card2 = getequipcardid(.@part, 1);
+	.@card3 = getequipcardid(.@part, 2);
+	.@card4 = getequipcardid(.@part, 3);
+	mes .@nm$;
+	if ( .@card4 ) {
+		mes "This item is currently enchanted.";
+		mes "Are you sure you want to overwrite this?";
+		next;
+		if ( select ("Yes:No") == 2 ) close;
+	}
+	if ( getiteminfo(.@itemid, 10) == 4 ) {
+		mes "I cannot enchant 4 slotted equipments.";
+		close;
+	}
+	if ( .@part == EQI_HAND_L && getiteminfo(.@itemid,2) != 4 ) {
+		mes "Only ^ff0000shields^000000 can be enchanted.";
+		close;
+	}
+	if ( countitem(.@itemid) > 1 ) {
+		mes "You must only have 1 x "+getitemname(.@itemid)+" in your inventory.";
+		close;
+	}
+	if ( countitem(.@payment) < .@amount ) {
+		mes "You dont have enough "+getitemname(.@payment)+" to avail my service.";
+		close;
+	}
+	
+	// Add the enchantment stones here..
+	// 4702 - STR +3 etc..
+	.@enchant = F_Rand(4702,4712,4722,4732,4742,4752);
+	
+	delitem .@payment, .@amount;
+	delitem .@itemid, 1;
+	getitem2 .@itemid, 1, 1, .@refine, 0, .@card1, .@card2, .@card3, .@enchant;
+	mes "Here you go!";
+	close;
+}
